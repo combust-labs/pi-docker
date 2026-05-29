@@ -1,22 +1,22 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-# pi-mono Docker Build
+# pi Docker Build
 
-This repository provides a comprehensive Docker image that runs the **pi-mono coding-agent** (`pi-mono`).
+This repository provides a comprehensive Docker image that runs the **pi coding-agent** (`pi`).
 
 ## What it contains
-- **`container/Containerfile`** - builds the image from `node:25-trixie`, installs required tools, clones the `pi-mono` source at the pinned version, builds it, and copies the `pi` CLI entry point.
+- **`container/Containerfile`** - builds the image from `node:25-trixie`, installs required tools, clones the `pi` source at the pinned version, builds it, and copies the `pi` CLI entry point.
 - **`container/pi-run.sh`** - container entrypoint that delegates to a generated shell script containing all CLI arguments
 - **`container/pi`** - helper script copied into the image as the `pi` CLI entry point
 - **`.pnpm-rc`, `.npmrc`, `.bunfig.toml`, `.config-uv-uv.toml`** - configuration files for pnpm, npm, bun, and uv package managers used during image build
 - **`Makefile`** – convenient target `make build-docker` that extracts the version from `container/Containerfile` and runs:
   ```
-  docker build --no-cache -t localhost/pi-mono:<version> .
+  docker build --no-cache -t localhost/pi:<version> .
   ```
 - **`ppi`** – helper script on the host that runs the container in CLI mode or HTTP-RPC server mode
 
 ## How to build
 ```bash
-make build-docker   # builds the image with the tag localhost/pi-mono:<version>
+make build-docker   # builds the image with the tag localhost/pi:<version>
 ```
 The `<version>` is taken from the `ARG PI_MONO_VERSION` line in `container/Containerfile`.
 
@@ -32,7 +32,7 @@ make build-docker PI_MONO_EXTENSIONS="git:https://github.com/combust-labs/read-w
 version=$(grep -E '^ARG PI_MONO_VERSION=' container/Containerfile | cut -d'=' -f2)
 docker build -f container/Containerfile \
   --build-arg PI_MONO_EXTENSIONS="read-website,subagent" \
-  -t "localhost/pi-mono:${version}" container/
+  -t "localhost/pi:${version}" container/
 ```
 
 Extensions are installed into `~/.pi/agent/extensions/` inside the image and are available at runtime without additional setup.
@@ -41,10 +41,10 @@ The following build args are supported:
 
 | Build Arg | Default | Description |
 |-----------|---------|-------------|
-| `PI_MONO_VERSION` | from `Containerfile` | Version of pi-mono to clone and build |
-| `PI_MONO_GIT_REPO` | `https://github.com/badlogic/pi-mono.git` | Git repository to clone pi-mono from |
+| `PI_MONO_VERSION` | from `Containerfile` | Version of pi to clone and build |
+| `PI_MONO_GIT_REPO` | `https://github.com/badlogic/pi.git` | Git repository to clone pi from |
 | `PI_MONO_EXTENSIONS` | (empty) | Comma-separated list of extensions to install at build time (e.g., `read-website,subagent`) |
-| `PI_RPC_HTTP_SERVER_VERSION` | (empty) | Version of pi-rpc-http-server to install (uses pi-mono version if empty) |
+| `PI_RPC_HTTP_SERVER_VERSION` | (empty) | Version of pi-rpc-http-server to install (uses pi version if empty) |
 | `NPM_VERSION` | (empty) | Specific npm version to install (optional) |
 | `NODE_VERSION` | `25` | Node.js version to use (reflected in `node:<VERSION>-trixie` base) |
 
@@ -55,7 +55,7 @@ docker run \
   -v $(pwd):/code \
   -e HTTP_PROXY=... \
   -e HTTPS_PROXY=... \
-  "localhost/pi-mono:${version}" \
+  "localhost/pi:${version}" \
   <args>
 ```
 Replace `<args>` with any command supported by the coding-agent CLI.
@@ -70,7 +70,7 @@ The helper script `ppi` provides two distinct ways to run the agent:
    ```
    *Consequences*: the process runs synchronously, outputs to STDOUT/STDERR, and exits when the query is complete.
 
-2. **HTTP-RPC server mode** - Supplying `--mode rpc` causes `ppi` to start the container with the `pi-rpc-http-server` entry-point (`/opt/agent/pi-mono/node_modules/pi-rpc-http-server/bin/run.sh`). The agent listens on the configured port (default `3000` inside the container) and serves a JSON-over-HTTP API.
+2. **HTTP-RPC server mode** - Supplying `--mode rpc` causes `ppi` to start the container with the `pi-rpc-http-server` entry-point (`/opt/agent/pi/node_modules/pi-rpc-http-server/bin/run.sh`). The agent listens on the configured port (default `3000` inside the container) and serves a JSON-over-HTTP API.
    ```bash
    ppi --mode rpc   # start the RPC server (default port 3000)
    ppi --mode rpc --ppi-container-port 8080  # custom container port
@@ -132,7 +132,7 @@ The `ppi` script supports the following flags, segregated into flags inherited f
 | `--ppi-host-add-path <path>` | (empty) | Add custom volume mount (format: `host-path:container-path:rw` or `host-path:container-path:ro`; allows multiple) |
 | `--ppi-host-port <n>` | (container port) | Host port exposed to localhost; defaults to container port if not set |
 | `--ppi-pass-env <name>=<value>` | (empty) | Pass environment variable to container as `-e name=value` (allows multiple) |
-| `--version <v>` | from Containerfile | Override pi-mono container version |
+| `--version <v>` | from Containerfile | Override pi container version |
 
 ### ppi-specific Boolean Flags
 | Flag | Description |

@@ -88,8 +88,8 @@ use_ppi_container_network=""
 use_ppi_pass_env=()
 # Skip prepending the default nickname prompt
 use_ppi_no_ppi_prompts=0
-# pi-mono container version
-use_version=v0.73.1
+# pi container version
+use_version=v0.77.0
 # Override if Containerfile exists
 if [ -f "${base}/container/Containerfile" ]; then
   use_version=$(grep -E '^ARG PI_MONO_VERSION=' "${base}/container/Containerfile" | cut -d'=' -f2)
@@ -437,7 +437,7 @@ if (( use_port >= 1  )) || [[ "${use_mode}" == "rpc" ]]; then
     -v $(pwd):/code \
     -e PORT=${use_ppi_container_port} \
     ${_ppi_pass_env_flags} \
-    "localhost/pi-mono:${use_version}" --mode rpc
+    "localhost/pi:${use_version}" --mode rpc
 
 else
 
@@ -457,7 +457,7 @@ else
   temp_file=$(mktemp)
   cat <<EOF > "${temp_file}"
 #!/bin/bash
-/opt/agent/pi-mono/packages/coding-agent/dist/pi --model ${use_model} \\
+/opt/agent/pi/packages/coding-agent/dist/pi --model ${use_model} \\
   ${_append_system_prompt_flags} \\
   ${_continue_flags} \\
   ${_extension_flags} \\
@@ -505,6 +505,6 @@ EOF
     ${_session_vol} \
     -v "$(pwd):/code" \
     ${_ppi_pass_env_flags} \
-    "localhost/pi-mono:${use_version}" --mode interactive
-    
+    "localhost/pi:${use_version}" --mode interactive
+
 fi

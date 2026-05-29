@@ -23,7 +23,7 @@ if [ "${use_mode}" == "interactive" ]; then
   chmod +x "${base}/pi-run-with-args.sh"
   "${base}/pi-run-with-args.sh"
 elif [ "${use_mode}" == "rpc" ]; then
-  /opt/agent/pi-mono/node_modules/pi-rpc-http-server/bin/run.sh
+  /opt/agent/pi/node_modules/pi-rpc-http-server/bin/run.sh
 else
   echo "Error: Unsupported mode ${use_mode}" >&2
   exit 1

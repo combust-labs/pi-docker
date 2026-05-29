@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM node:25-trixie
 
-ARG PI_MONO_VERSION=v0.73.1
-ARG PI_MONO_GIT_REPO=https://github.com/badlogic/pi-mono.git
-ARG PI_MONO_EXTENSIONS=""
+ARG PI_VERSION=v0.77.0
+ARG PI_GIT_REPO=https://github.com/earendil-works/pi.git
+ARG PI_EXTENSIONS=""
 
-ENV PATH="$PATH:/root/.local/bin:/opt/agent/pi-mono/packages/coding-agent/dist" \
+ENV PATH="$PATH:/root/.local/bin:/opt/agent/pi/packages/coding-agent/dist" \
   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
   PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
@@ -23,25 +23,25 @@ RUN mkdir -p ~/.local/bin \
   && apt update \
   && apt install -y curl fd-find ripgrep tree unzip zip \
   && ln -s "$(which fdfind)" ~/.local/bin/fd \
-  && mkdir -p /opt/agent/pi-mono \
-  && cd /opt/agent/pi-mono \
-  && git clone "${PI_MONO_GIT_REPO}" . \
-  && git checkout "${PI_MONO_VERSION}" \
-  && echo " => install pi-mono dependencies" \
+  && mkdir -p /opt/agent/pi \
+  && cd /opt/agent/pi \
+  && git clone "${PI_GIT_REPO}" . \
+  && git checkout "${PI_VERSION}" \
+  && echo " => install pi dependencies" \
   && npm install \
-  && echo " => build pi-mono" \
+  && echo " => build pi" \
   && npm run build \
   && echo " => making required programs executable" \
   && chmod 0755 /.pi/pi-run.sh \
-  && mv -v /.pi/pi /opt/agent/pi-mono/packages/coding-agent/dist/pi \
-  && chmod 0755 /opt/agent/pi-mono/packages/coding-agent/dist/pi \
+  && mv -v /.pi/pi /opt/agent/pi/packages/coding-agent/dist/pi \
+  && chmod 0755 /opt/agent/pi/packages/coding-agent/dist/pi \
   && echo " => install extensions" \
-  && if [ -n "${PI_MONO_EXTENSIONS}" ]; then \
-  echo "${PI_MONO_EXTENSIONS}" | tr ',' '\n' | xargs -I{} /opt/agent/pi-mono/packages/coding-agent/dist/pi install {} ; \
+  && if [ -n "${PI_EXTENSIONS}" ]; then \
+  echo "${PI_EXTENSIONS}" | tr ',' '\n' | xargs -I{} /opt/agent/pi/packages/coding-agent/dist/pi install {} ; \
   fi \
-  && echo " => installing pi-mono-http-proxy" \
-  && npm install --save "git://github.com/combust-labs/pi-mono-http-proxy.git#3ec12f7e68f0578369935810b669d08638e9d371" \
-  && chmod 0755 /opt/agent/pi-mono/node_modules/pi-rpc-http-server/bin/run.sh \
+  && echo " => installing pi-http-proxy" \
+  && npm install --save "git://github.com/combust-labs/pi-http-proxy.git#3ec12f7e68f0578369935810b669d08638e9d371" \
+  && chmod 0755 /opt/agent/pi/node_modules/pi-rpc-http-server/bin/run.sh \
   && echo " => install bun" \
   && curl -fsSL https://bun.com/install | bash \
   && echo " => install pnpm" \

@@ -6,24 +6,24 @@ help:
 	@echo "Available make targets:"
 	@grep -E '^[a-zA-Z0-9_-]+:' $(MAKEFILE_LIST) | grep -v '^\.PHONY' | cut -d: -f1 | sort
 
-# Extract the PI_MONO_VERSION argument from Containerfile
-VERSION := $(shell grep -E '^ARG PI_MONO_VERSION=' container/Containerfile | cut -d'=' -f2)
+# Extract the PI_VERSION argument from Containerfile
+VERSION := $(shell grep -E '^ARG PI_VERSION=' container/Containerfile | cut -d'=' -f2)
 
-# Extract the PI_MONO_GIT_REPO argument from Containerfile
-PI_MONO_GIT_REPO := $(shell grep -E '^ARG PI_MONO_GIT_REPO=' container/Containerfile | cut -d'=' -f2)
+# Extract the PI_GIT_REPO argument from Containerfile
+PI_GIT_REPO := $(shell grep -E '^ARG PI_GIT_REPO=' container/Containerfile | cut -d'=' -f2)
 
 # Extensions to install (comma-separated list, e.g., "read-website,subagent")
-PI_MONO_EXTENSIONS ?= ""
+PI_EXTENSIONS ?= ""
 
 .PHONY: build-docker install-ppi check-update hf-push-sessions
 build-docker:
-	@echo "Building Docker image with tag localhost/pi-mono:$(VERSION)"
-	@echo "Extensions: $(PI_MONO_EXTENSIONS)"
+	@echo "Building Docker image with tag localhost/pi:$(VERSION)"
+	@echo "Extensions: $(PI_EXTENSIONS)"
 	@cd container && docker build --no-cache -f Containerfile \
-		--build-arg PI_MONO_VERSION=$(VERSION) \
-		--build-arg PI_MONO_GIT_REPO=$(PI_MONO_GIT_REPO) \
-		--build-arg PI_MONO_EXTENSIONS=$(PI_MONO_EXTENSIONS) \
-		-t localhost/pi-mono:$(VERSION) .
+		--build-arg PI_VERSION=$(VERSION) \
+		--build-arg PI_GIT_REPO=$(PI_GIT_REPO) \
+		--build-arg PI_EXTENSIONS=$(PI_EXTENSIONS) \
+		-t localhost/pi:$(VERSION) .
 
 install-ppi:
 	@mkdir -p "$$HOME/.local/bin"
@@ -35,12 +35,12 @@ install-ppi:
 hf-push-sessions:
 	@[ -d ./.pi/sessions/--code--/ ] && hf upload rgruchalski/combust-labs_pi-mono-docker ./.pi/sessions/--code--/ --repo-type=dataset
 
-# Check for pi-mono updates via GitHub API
+# Check for pi updates via GitHub API
 check-update:
 	@echo "Current version: $(VERSION)"
 	@echo "Fetching latest release from GitHub..."
-	@echo "Repository: $(PI_MONO_GIT_REPO)"
-	@REPO=$$(echo $(PI_MONO_GIT_REPO) | sed -E 's|.*github.com/||' ); REPO=$${REPO%.git}; \
+	@echo "Repository: $(PI_GIT_REPO)"
+	@REPO=$$(echo $(PI_GIT_REPO) | sed -E 's|.*github.com/||' ); REPO=$${REPO%.git}; \
 	LATEST=$$(curl -s https://api.github.com/repos/$$REPO/releases/latest | grep '"tag_name":' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/'); \
 	if [ -z "$$LATEST" ]; then \
 		echo "Error: Could not fetch latest release. Check your internet connection."; \
@@ -51,6 +51,5 @@ check-update:
 		echo "✓ You are running the latest version!"; \
 	else \
 		echo "⚠ Update available: $(VERSION) → $$LATEST"; \
-		echo "  Run 'sed -i "s/ARG PI_MONO_VERSION=.*/ARG PI_MONO_VERSION=$$LATEST/" container/Containerfile' to update."; \
+		echo "  Run 'sed -i "s/ARG PI_VERSION=.*/ARG PI_VERSION=$$LATEST/" container/Containerfile' to update."; \
 	fi
-
