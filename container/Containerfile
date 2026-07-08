@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM node:25-trixie
 
-ARG PI_VERSION=v0.77.0
+ARG PI_VERSION=v0.80.3
 ARG PI_GIT_REPO=https://github.com/earendil-works/pi.git
 ARG PI_EXTENSIONS=""
 
